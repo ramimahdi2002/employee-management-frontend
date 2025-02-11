@@ -1577,6 +1577,18 @@
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
+"@preact/signals-core@^1.7.0":
+  version "1.8.0"
+  resolved "https://registry.npmjs.org/@preact/signals-core/-/signals-core-1.8.0.tgz"
+  integrity sha512-OBvUsRZqNmjzCZXWLxkZfhcgT+Fk8DDcT/8vD6a1xhDemodyy87UJRJfASMuSD8FaAIeGgGm85ydXhm7lr4fyA==
+
+"@preact/signals@^1.1.5":
+  version "1.3.2"
+  resolved "https://registry.npmjs.org/@preact/signals/-/signals-1.3.2.tgz"
+  integrity sha512-naxcJgUJ6BTOROJ7C3QML7KvwKwCXQJYTc5L/b0eEsdYgPB6SxwoQ1vDGcS0Q7GVjAenVq/tXrybVdFShHYZWg==
+  dependencies:
+    "@preact/signals-core" "^1.7.0"
+
 "@rollup/plugin-babel@^5.2.0":
   version "5.3.1"
   resolved "https://registry.npmjs.org/@rollup/plugin-babel/-/plugin-babel-5.3.1.tgz"
@@ -1623,6 +1635,16 @@
   version "1.10.5"
   resolved "https://registry.npmjs.org/@rushstack/eslint-patch/-/eslint-patch-1.10.5.tgz"
   integrity sha512-kkKUDVlII2DQiKy7UstOR1ErJP8kUKAQ4oa+SQtM0K+lPdmmjj0YnnxBgtTVYH7mUKtbsxeFC9y0AmK7Yb78/A==
+
+"@schedule-x/calendar@^2.18.0":
+  version "2.18.0"
+  resolved "https://registry.npmjs.org/@schedule-x/calendar/-/calendar-2.18.0.tgz"
+  integrity sha512-ZnlYFD8P9dXxCsDpEMviOK8xVK4b871s+m4mWhLsIutyFUNwxFw/kVFtrMHCZhin2SRoh+pyXBfQqsHxQDMpmA==
+
+"@schedule-x/react@^2.18.0":
+  version "2.18.0"
+  resolved "https://registry.npmjs.org/@schedule-x/react/-/react-2.18.0.tgz"
+  integrity sha512-iIUyZyLY+25fXddOUriUtiY7oBB/gofcWuFueVVWn97Zo03IJ+ptaCvvBRnVZJ2srPqt6huxFso8BEEygNfyog==
 
 "@sinclair/typebox@^0.24.1":
   version "0.24.51"
@@ -7548,6 +7570,11 @@ postcss@^7.0.35:
     picocolors "^0.2.1"
     source-map "^0.6.1"
 
+preact@^10.19.2, preact@10.x:
+  version "10.25.4"
+  resolved "https://registry.npmjs.org/preact/-/preact-10.25.4.tgz"
+  integrity sha512-jLdZDb+Q+odkHJ+MpW/9U5cODzqnB+fy2EiHSZES7ldV5LK7yjlVzTp7R8Xy6W6y75kfK8iWYtFVH7lvjwrCMA==
+
 prelude-ls@^1.2.1:
   version "1.2.1"
   resolved "https://registry.npmjs.org/prelude-ls/-/prelude-ls-1.2.1.tgz"
@@ -7737,7 +7764,7 @@ react-dev-utils@^12.0.1:
     strip-ansi "^6.0.1"
     text-table "^0.2.0"
 
-react-dom@^19.0.0, react-dom@>=18:
+"react-dom@^16.7.0 || ^17 || ^18 || ^19", react-dom@^19.0.0, react-dom@>=18:
   version "19.0.0"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-19.0.0.tgz"
   integrity sha512-4GV5sHFG0e/0AD4X+ySy6UJd3jVl1iNsNHdpad0qhABJ11twS3TTBnseqsKurKcsNqCEFeGL3uLpVChpIO3QfQ==
@@ -7841,7 +7868,7 @@ react-scripts@5.0.1:
   optionalDependencies:
     fsevents "^2.3.2"
 
-react@^19.0.0, "react@>= 16", react@>=18:
+"react@^16.7.0 || ^17 || ^18 || ^19", react@^19.0.0, "react@>= 16", react@>=18:
   version "19.0.0"
   resolved "https://registry.npmjs.org/react/-/react-19.0.0.tgz"
   integrity sha512-V8AVnmPIICiWpGfm6GLzCR/W5FXLchHop40W4nXBmdlEceh16rCN8O8LNWm5bh5XUX91fh7KpA+W0TgMKmgTpQ==

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
 const EmployeeForm = ({ id, onClose }) => {
+  const MINIMUM_WAGE = 800;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,6 +21,7 @@ const EmployeeForm = ({ id, onClose }) => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [documentPreviews, setDocumentPreviews] = useState([]);
   const [identityPreviews, setIdentityPreviews] = useState([]);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (id) {
@@ -30,31 +32,59 @@ const EmployeeForm = ({ id, onClose }) => {
             ...data,
             start_date: data.start_date ? new Date(data.start_date).toISOString().split('T')[0] : '',
             end_date: data.end_date ? new Date(data.end_date).toISOString().split('T')[0] : '',
+            date_of_birth: data.date_of_birth ? new Date(data.date_of_birth).toISOString().split('T')[0] : '',
             photo: null,
             documents: [],
             identities: []
           });
-  
+
           if (data.photo) {
             setPhotoPreview(`http://localhost:8000/storage/${data.photo}`);
           }
-  
+
           if (data.documents?.length > 0) {
-            setDocumentPreviews(
-              data.documents.map(doc => `http://localhost:8000/storage/${doc}`)
-            );
+            setDocumentPreviews(data.documents.map(doc => `http://localhost:8000/storage/${doc}`));
           }
-  
+
           if (data.identities?.length > 0) {
-            setIdentityPreviews(
-              data.identities.map(idDoc => `http://localhost:8000/storage/${idDoc}`)
-            );
+            setIdentityPreviews(data.identities.map(idDoc => `http://localhost:8000/storage/${idDoc}`));
           }
         })
         .catch(err => console.error(err));
     }
   }, [id]);
-  
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) newErrors.name = "Name is required.";
+    if (!formData.email.trim()) newErrors.email = "Email is required.";
+    if (!formData.date_of_birth) newErrors.date_of_birth = "Date of birth is required.";
+    if (!formData.salary) newErrors.salary = "Salary is required.";
+    if (!formData.job_title.trim()) newErrors.job_title = "Job title is required.";
+    if (!formData.department.trim()) newErrors.department = "Department is required.";
+
+    if (formData.date_of_birth) {
+      const birthDate = new Date(formData.date_of_birth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      if (age < 18) {
+        newErrors.date_of_birth = "Employee must be at least 18 years old.";
+      }
+    }
+
+    const salary = parseFloat(formData.salary);
+    if (salary < MINIMUM_WAGE) {
+      newErrors.salary = `Salary must be at least $${MINIMUM_WAGE}.`;
+    }
+
+    if (formData.identities.length === 0) {
+      newErrors.identities = "At least one identity document is required.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,25 +100,31 @@ const EmployeeForm = ({ id, onClose }) => {
   };
 
   const handleDocumentsChange = (e) => {
-    setFormData(prev => ({ ...prev, documents: e.target.files }));
+    setFormData(prev => ({ ...prev, documents: Array.from(e.target.files) }));
   };
 
   const handleIdentityChange = (e) => {
-    setFormData(prev => ({ ...prev, identities: e.target.files }));
+    setFormData(prev => ({ ...prev, identities: Array.from(e.target.files) }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData();
+    
+    if (!validateForm()) return;
 
+    const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (key !== "documents" && key !== "identities" && value) {
         data.append(key, value);
       }
     });
 
-    if (formData.photo) {
-      data.append("photo", formData.photo);
+    if (formData.documents.length > 0) {
+      formData.documents.forEach(doc => data.append('documents[]', doc));
+    }
+
+    if (formData.identities.length > 0) {
+      formData.identities.forEach(idDoc => data.append('identities[]', idDoc));
     }
 
     try {
@@ -101,7 +137,7 @@ const EmployeeForm = ({ id, onClose }) => {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       }
-      onClose(); 
+      onClose();
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error);
     }
@@ -111,95 +147,38 @@ const EmployeeForm = ({ id, onClose }) => {
     <div>
       <h3>{id ? 'Edit Employee' : 'Create Employee'}</h3>
       <form onSubmit={handleSubmit}>
-          <div>
-            <label>Name *</label>
-            <input name="name" value={formData.name} onChange={handleChange} required />
+        {["name", "email", "date_of_birth", "salary", "phone", "department", "job_title", "start_date", "end_date"].map(field => (
+          <div key={field}>
+            <label>{field.replace('_', ' ').toUpperCase()} {["name", "email", "date_of_birth", "salary"].includes(field) && '*'}</label>
+            <input 
+              type={field === "salary" ? "number" : field.includes("date") ? "date" : "text"}
+              name={field}
+              value={formData[field]}
+              onChange={handleChange}
+              required={["name", "email", "date_of_birth", "salary"].includes(field)}
+            />
+            {errors[field] && <p className="text-danger">{errors[field]}</p>}
           </div>
+        ))}
 
-          <div>
-            <label>Email *</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} required />
-          </div>
+        <div>
+          <label>Photo</label>
+          <input type="file" name="photo" accept="image/*" onChange={handleFileChange} />
+          {photoPreview && <img src={photoPreview} alt="Employee" style={{ width: '150px', height: '150px', objectFit: 'cover' }} />}
+        </div>
 
-          <div>
-            <label>Phone</label>
-            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} />
-          </div>
+        <div>
+          <label>Documents</label>
+          <input type="file" name="documents" multiple onChange={handleDocumentsChange} />
+        </div>
 
-          <div>
-            <label>Department </label>
-            <input name="department" value={formData.department} onChange={handleChange}  />
-          </div>
+        <div>
+          <label>Identity Document *</label>
+          <input type="file" name="identities" accept=".pdf,.jpg,.png" multiple onChange={handleIdentityChange} required />
+          {errors.identities && <p className="text-danger">{errors.identities}</p>}
+        </div>
 
-          <div>
-            <label>Job Title </label>
-            <input name="job_title" value={formData.job_title} onChange={handleChange}  />
-          </div>
-
-          <div>
-            <label>Salary </label>
-            <input name="salary" value={formData.salary} onChange={handleChange}  />
-          </div>
-          <div>
-            <label>Start Date </label>
-            <input type="date" name="start_date" value={formData.start_date} onChange={handleChange}  />
-          </div>
-          <div>
-            <label>End Date </label>
-            <input type="date" name="end_date" value={formData.end_date} onChange={handleChange}  />
-          </div>
-          <div>
-            <label>Photo</label>
-            <input type="file" name="photo" accept="image/*" onChange={handleFileChange} />
-          </div>
-
-          {photoPreview && (
-            <div>
-              <img src={photoPreview} alt="Employee" style={{ width: '150px', height: '150px', objectFit: 'cover' }} />
-            </div>
-          )}
-
-          <div>
-            <label>Documents</label>
-            <input type="file" name="documents" multiple onChange={handleDocumentsChange} />
-          </div>
-
-          {documentPreviews.length > 0 && (
-            <div>
-              <h4>Existing Documents</h4>
-              {documentPreviews.map((doc, index) => (
-                <div key={index}>
-                  {doc.endsWith('.pdf') ? (
-                    <a href={doc} target="_blank" rel="noopener noreferrer">View Document {index + 1}</a>
-                  ) : (
-                    <img src={doc} alt={`Document ${index + 1}`} style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div>
-            <label>Identity Document</label>
-            <input type="file" name="identities" accept=".pdf,.jpg,.png" multiple onChange={handleIdentityChange} />
-          </div>
-
-          {identityPreviews.length > 0 && (
-            <div>
-              <h4>Existing Identity Documents</h4>
-              {identityPreviews.map((idDoc, index) => (
-                <div key={index}>
-                  {idDoc.endsWith('.pdf') ? (
-                    <a href={idDoc} target="_blank" rel="noopener noreferrer">View Identity {index + 1}</a>
-                  ) : (
-                    <img src={idDoc} alt={`Identity ${index + 1}`} style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
-                  )}
-                </div>
-              ))}
-            </div>
-
-          )}
-          <button type="submit">{id ? 'Update' : 'Create'} Employee</button>
+        <button type="submit">{id ? 'Update' : 'Create'} Employee</button>
       </form>
     </div>
   );
